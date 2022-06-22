@@ -24,6 +24,59 @@ contract PixelKingsMint is ERC1155 {
         _mint(msg.sender, starterBox, 1, "");
     }
 
+    struct Shooter {
+        string archer;
+        string frostArcher;
+        string doubleArrows;
+        string tripleArrows;
+        string sniperArcher;
+        string geminiArcher;
+        string bomerangMan;
+        string bomberArcher;
+        string randomBomberArcher;
+        string launcherArcher;
+        string theMadArcher;
+        string frozenBomber;
+    }
+
+    struct OneShoot {
+        string blackWolf;
+        string redWolf;
+    }
+
+    struct Tank {
+        string soldier;
+        string goldenSoldier;
+        string steelCrog;
+        string goldenCrog;
+    }
+
+    struct Explosive {
+        string bomberman;
+        string tntTactician;
+        string magnusWizard;
+    }
+
+    struct Miner {
+        string noviceMiner;
+        string masterMiner;
+    }
+
+    struct Support {
+        string fireGolem;
+        string lanternWizard;
+        string magneticWizard;
+        string windcallerWizard;
+        string magicShield;
+        string toxicWizard;
+        string spiderShield;
+    }
+
+    struct Dragon {
+        string seaDragon;
+        string dragonAmbusher;
+    } 
+
     modifier onlyOwner {
       require(msg.sender == owner);
       _;
