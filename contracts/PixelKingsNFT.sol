@@ -5,7 +5,6 @@ pragma solidity =0.8.10;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract PixelKingsMint is ERC1155 {
-    owner = msg.sender;
     uint public constant bronzeBox = 0; // Box and ID Number
     uint public constant silverBox = 1;
     uint public constant goldenBox = 2;
@@ -16,6 +15,7 @@ contract PixelKingsMint is ERC1155 {
     address owner;
 
     constructor() ERC1155("https://URI.com/{id}") {
+        owner = msg.sender;
         _mint(msg.sender, bronzeBox, 6, ""); // Msg.sender and quantity of boxes
         _mint(msg.sender, silverBox, 6, "");
         _mint(msg.sender, goldenBox, 6, "");
