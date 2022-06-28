@@ -32,10 +32,19 @@ contract PixelKingsMarketplace is Ownable {
         Epic
     }
 
-    mapping(Box => uint256) private boxValue;
-    mapping(address => Box) private userBox;
-    mapping(Class => string[]) private classHero;
-    mapping(string => string) private heroUri;
+    event NewHero(string name, Class class);
+
+    event UpdateHero(string name, string uri);
+
+    mapping(Box => uint256) public boxValue;
+    mapping(address => string) public userBox;
+    mapping(Class => string[]) public classHero;
+    mapping(string => string) public heroUri;
+
+    address[] private witheList;
+    mapping(address => uint8) private boxBuyed;
+    bool private privateSale = true;
+    uint8 private maxBuy = 6;
 
     uint256[4] private bronzenBox = [80, 98, 100, 0];
     uint256[4] private silverBox = [60, 92, 98, 100];
@@ -47,17 +56,22 @@ contract PixelKingsMarketplace is Ownable {
 
     struct HeroS {
         string name;
+        string uri;
         Class class;
         Rarity rarity;
     }
 
+    //verificar
     modifier notOwnerOfBox(address _recipient) {
         require(msg.sender == _recipient, "Not allowed");
         _;
     }
 
-    modifier dontHaveBox(address _recipient, Box _box) {
-        require(userBox[_recipient] == _box, "User not possess a Box");
+    modifier dontHaveBox(address _recipient, string memory _box) {
+        require(
+            keccak256(bytes(userBox[_recipient])) == keccak256(bytes(_box)),
+            "User not possess a Box"
+        );
         _;
     }
 
@@ -66,24 +80,59 @@ contract PixelKingsMarketplace is Ownable {
         tokenAddress2 = _tokenAddress2;
     }
 
-    function buyBox(address _recipient, Box _box,  uint _amount)
-        external
-        notOwnerOfBox(_recipient)
-    {
+    function buyBox(
+        address _recipient,
+        Box _box,
+        uint256 _amount
+    ) external notOwnerOfBox(_recipient) {
+        //verificar
         require(_amount >= boxValue[_box], "Not enough amount");
-        address owner = owner();
-        ERC20(tokenAddress1).transferFrom(msg.sender, owner, _amount);
-        userBox[_recipient] = _box;
+
+        if (privateSale) {
+            for (uint256 i; i <= witheList.length; i++) {
+                if (witheList[i] == _recipient) {
+                    address owner = owner();
+                    ERC20(tokenAddress1).transferFrom(msg.sender, owner, _amount);
+                    if (_box == Box.BronzenBox) {
+                        userBox[_recipient] = "BronzenBox";
+                    } else if (_box == Box.SilverBox) {
+                        userBox[_recipient] = "SilverBox";
+                    } else if (_box == Box.GoldenBox) {
+                        userBox[_recipient] = "GoldenBox";
+                    } else if (_box == Box.GreenBox) {
+                        userBox[_recipient] = "GreenBox";
+                    } else if (_box == Box.BlueBox) {
+                        userBox[_recipient] = "BlueBox";
+                    }
+                }
+            }
+        } else if (!privateSale) {
+            address owner = owner();
+            ERC20(tokenAddress1).transferFrom(msg.sender, owner, _amount);
+            if (_box == Box.BronzenBox) {
+                userBox[_recipient] = "BronzenBox";
+            } else if (_box == Box.SilverBox) {
+                userBox[_recipient] = "SilverBox";
+            } else if (_box == Box.GoldenBox) {
+                userBox[_recipient] = "GoldenBox";
+            } else if (_box == Box.GreenBox) {
+                userBox[_recipient] = "GreenBox";
+            } else if (_box == Box.BlueBox) {
+                userBox[_recipient] = "BlueBox";
+            }
+        }
     }
 
+    
     function openBronzenBox(
         address _recipient,
         Class _class,
-        uint8 _module
+        uint8 _module //verificar
     )
-        view
         external
-        dontHaveBox(_recipient, Box.BronzenBox) returns (HeroS memory hero)
+        view
+        dontHaveBox(_recipient, "BronzenBox")
+        returns (HeroS memory hero)
     {
         require(_module > 0 && _module <= 100);
 
@@ -91,7 +140,6 @@ contract PixelKingsMarketplace is Ownable {
 
         require(heros.length != 0);
 
-        
         hero.class = _class;
 
         if (_module <= bronzenBox[0] && _module > 0) {
@@ -102,11 +150,16 @@ contract PixelKingsMarketplace is Ownable {
             hero.rarity = Rarity.Rare;
         }
 
-        uint256 heroName = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, heros.length))) % heros.length;
+        uint heroName = uint(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
 
         hero.name = heros[heroName];
+        hero.uri = heroUri[hero.name];
 
-       
+        //TODO - MINT NEW NFT
     }
 
     function openSilverBox(
@@ -136,10 +189,33 @@ contract PixelKingsMarketplace is Ownable {
     function updateBoxValue(Box _box, uint256 _value) external onlyOwner {
         boxValue[_box] = _value;
     }
-    
-    function addNewHero(Class _class, string memory _hero) external onlyOwner {
+
+    function updateHeroUri(string memory _hero, string memory _uri)
+        external
+        onlyOwner
+    {
+        heroUri[_hero] = _uri;
+        emit UpdateHero(_hero, _uri);
+    }
+
+    function addNewHero(
+        Class _class,
+        string memory _hero,
+        string memory _uri
+    ) external onlyOwner {
         string[] storage heros = classHero[_class];
         heros.push(_hero);
+        heroUri[_hero] = _uri;
         classHero[_class] = heros;
-    } 
+
+        emit NewHero(_hero, _class);
+    }
+
+    function addUserToWhiteList(address _address) external onlyOwner {
+        witheList.push(_address);
+    }
+
+    function finishprivateSale() external onlyOwner {
+        privateSale = false;
+    }
 }

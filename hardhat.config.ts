@@ -19,6 +19,10 @@ const POLYGON_API_KEY: any = process.env.POLYGON_API_KEY;
 const config: HardhatUserConfig = {
   solidity: '0.8.4',
   networks: {
+    local: {
+      url: "HTTP://127.0.0.1:7545",
+      accounts: [PRIVATE_KEY_LOCAL]
+    },
     bsc: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       accounts: [PRIVATE_KEY]
