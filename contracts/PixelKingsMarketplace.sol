@@ -51,8 +51,7 @@ contract PixelKingsMarketplace is Ownable {
     uint256[4] private goldenBox = [30, 75, 95, 100];
     uint256[2] private minerBox = [90, 100];
 
-    address private tokenAddress1;
-    address private tokenAddress2;
+    address public tokenAddress1;
 
     struct HeroS {
         string name;
@@ -75,9 +74,8 @@ contract PixelKingsMarketplace is Ownable {
         _;
     }
 
-    constructor(address _tokenAddress1, address _tokenAddress2) {
+    constructor(address _tokenAddress1) {
         tokenAddress1 = _tokenAddress1;
-        tokenAddress2 = _tokenAddress2;
     }
 
     function buyBox(
