@@ -1,5 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 import { PixelKingsMarketplace, BusdMock } from '../typechain-types/contracts';
 
@@ -7,12 +8,12 @@ describe('Marketplace', async () => {
   let marketplaceContract: PixelKingsMarketplace;
   let busdContract: BusdMock;
   let owner: SignerWithAddress;
-  let player1: SignerWithAddress;
-  const player1BusdAmount: number = 300;
+  let player: SignerWithAddress;
+  const playerBusdAmount: number = 300;
 
   beforeEach(async () => {
     owner = (await ethers.getSigners())[0];
-    player1 = (await ethers.getSigners())[1];
+    player = (await ethers.getSigners())[1];
 
     const Busd = await ethers.getContractFactory('BusdMock');
     busdContract = await Busd.deploy();
@@ -22,7 +23,9 @@ describe('Marketplace', async () => {
     marketplaceContract = await Marketplace.deploy(busdContract.address);
     await marketplaceContract.deployed();
 
-    await busdContract.connect(player1).mint(player1BusdAmount);
+    await busdContract.connect(player).mint(playerBusdAmount);
+    await marketplaceContract.addToWhitelist(player.address);
+
     addHeroesToMarketplace();
   });
 
@@ -32,14 +35,14 @@ describe('Marketplace', async () => {
   });
 
   it('Should buy bronzen box with archer class', async () => {
-    const brozenBoxPrice = 10000000000000000000; //10
+    const brozenBoxPrice: BigNumber = BigNumber.from(10);
     const brozenBoxNumber = 0;
     const archerClassNumber = 0;
-    busdContract.connect(player1).approve(marketplaceContract.address, brozenBoxPrice);
+    busdContract.connect(player).approve(marketplaceContract.address, brozenBoxPrice);
 
-    await marketplaceContract.connect(player1).buyBox(brozenBoxNumber, archerClassNumber, 1);
-
-    
+    await expect(marketplaceContract.connect(player).buyBox(brozenBoxNumber, archerClassNumber, 1))
+      .to.emit(marketplaceContract, "NewHeroNft")
+      .withArgs(1, player.address);
   })
 
   const addHeroesToMarketplace = async () => {
