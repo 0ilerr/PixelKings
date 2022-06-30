@@ -24,25 +24,37 @@ describe('Marketplace', async () => {
     await marketplaceContract.deployed();
 
     await busdContract.connect(player).mint(playerBusdAmount);
-    await marketplaceContract.addToWhitelist(player.address);
-
+    
     addHeroesToMarketplace();
   });
-
+  
   it('Should deploy correctly', async () => {
     expect(await marketplaceContract.owner()).to.equal(owner.address);
     expect(await marketplaceContract.tokenAddress()).to.equal(busdContract.address);
   });
-
+  
   it('Should buy bronzen box with archer class', async () => {
+    const brozenBoxPrice: BigNumber = BigNumber.from(10);
+    const brozenBoxNumber = 0;
+    const archerClassNumber = 0;
+    
+    await marketplaceContract.addToWhitelist(player.address);
+
+    busdContract.connect(player).approve(marketplaceContract.address, brozenBoxPrice);
+
+    await expect(marketplaceContract.connect(player).buyBox(brozenBoxNumber, archerClassNumber, 1))
+      .to.emit(marketplaceContract, "NewHeroNft")
+      .withArgs(1, player.address);
+  })
+
+  it('Should revert if the user is not in the white list', async () => {
     const brozenBoxPrice: BigNumber = BigNumber.from(10);
     const brozenBoxNumber = 0;
     const archerClassNumber = 0;
     busdContract.connect(player).approve(marketplaceContract.address, brozenBoxPrice);
 
     await expect(marketplaceContract.connect(player).buyBox(brozenBoxNumber, archerClassNumber, 1))
-      .to.emit(marketplaceContract, "NewHeroNft")
-      .withArgs(1, player.address);
+      .to.revertedWith('Open sale has not started')
   })
 
   const addHeroesToMarketplace = async () => {
