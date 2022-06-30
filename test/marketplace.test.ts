@@ -57,6 +57,16 @@ describe('Marketplace', async () => {
       .to.revertedWith('Open sale has not started')
   })
 
+  it('Should revert if the module value is incorrect', async () => {
+    const brozenBoxPrice: BigNumber = BigNumber.from(10);
+    const brozenBoxNumber = 0;
+    const archerClassNumber = 0;
+    busdContract.connect(player).approve(marketplaceContract.address, brozenBoxPrice);
+
+    await expect(marketplaceContract.connect(player).buyBox(brozenBoxNumber, archerClassNumber, 108))
+      .to.revertedWith('Module must be between 0 and 100')
+  })
+
   const addHeroesToMarketplace = async () => {
     await marketplaceContract.addNewHero(0, "Archer", "uri");
     await marketplaceContract.addNewHero(0, "Frost Archer", "uri");
