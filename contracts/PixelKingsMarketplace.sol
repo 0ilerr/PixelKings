@@ -28,10 +28,10 @@ contract PixelKingsMarketplace is HeroNft {
     bool private privateSale = true;
     uint8 private maxBuy = 6;
 
-    uint256[2] private bronzenBox = [80, 98];
-    uint256[3] private silverBox = [60, 92, 98];
-    uint256[3] private goldenBox = [30, 75, 95];
-    uint256[1] private minerBox = [90];
+    uint[2] private bronzenBox = [80, 98];
+    uint[3] private silverBox = [60, 92, 98];
+    uint[3] private goldenBox = [30, 75, 95];
+    uint[1] private minerBox = [90];
 
     address public tokenAddress;
 
@@ -46,11 +46,19 @@ contract PixelKingsMarketplace is HeroNft {
         boxPrice[Box.BlueBox] = 50;
     }
 
+    modifier isModuleCorrect(uint8 _module) {
+        require(
+            _module > 0 && _module <= 100,
+            "Module must be between 0 and 100"
+        );
+        _;
+    }
+
     function buyBox(
         Box _box,
         Class _class,
         uint8 _module
-    ) external {
+    ) external isModuleCorrect(_module) {
         address sender = _msgSender();
 
         require(!privateSale || whitelist[sender], "Open sale has not started");
@@ -91,8 +99,6 @@ contract PixelKingsMarketplace is HeroNft {
         view
         returns (Hero memory hero)
     {
-        require(_module > 0 && _module <= 100);
-
         hero.class = _class;
 
         string[] memory heros = classHero[_class];
@@ -120,8 +126,6 @@ contract PixelKingsMarketplace is HeroNft {
         view
         returns (Hero memory hero)
     {
-        require(_module > 0 && _module <= 100);
-
         hero.class = _class;
 
         string[] memory heros = classHero[_class];
@@ -151,8 +155,6 @@ contract PixelKingsMarketplace is HeroNft {
         view
         returns (Hero memory hero)
     {
-        require(_module > 0 && _module <= 100);
-
         hero.class = _class;
 
         string[] memory heros = classHero[_class];
@@ -182,8 +184,6 @@ contract PixelKingsMarketplace is HeroNft {
         view
         returns (Hero memory hero)
     {
-        require(_module > 0 && _module <= 100);
-
         hero.class = Class.Miner;
 
         string[] memory heros = classHero[Class.Miner];
@@ -204,15 +204,9 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openGreenBox(
-        Class _class,
-        uint8 _module
-    ) external payable {}
+    function openGreenBox(Class _class, uint8 _module) external payable {}
 
-    function openBlueBox(
-        Class _class,
-        uint8 _module
-    ) external payable {}
+    function openBlueBox(Class _class, uint8 _module) external payable {}
 
     function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
         boxPrice[_box] = _price;
