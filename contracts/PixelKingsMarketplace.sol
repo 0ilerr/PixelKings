@@ -22,7 +22,6 @@ contract PixelKingsMarketplace is HeroNft {
     mapping(Box => uint) public boxPrice;
     mapping(address => string) public userBox;
     mapping(Class => string[]) public classHero;
-    
 
     mapping(address => bool) private whitelist;
     mapping(address => uint8) private boxesBuyed;
@@ -53,7 +52,7 @@ contract PixelKingsMarketplace is HeroNft {
         uint8 _module
     ) external {
         address sender = _msgSender();
-        
+
         require(!privateSale || whitelist[sender], "Open sale has not started");
         require(boxesBuyed[sender] < maxBuy, "Reached max buy");
 
@@ -78,6 +77,12 @@ contract PixelKingsMarketplace is HeroNft {
     ) internal view returns (Hero memory hero) {
         if (_box == Box.BronzenBox) {
             return openBronzenBox(_class, _module);
+        } else if (_box == Box.SilverBox) {
+            return openSilverBox(_class, _module);
+        } else if (_box == Box.GoldenBox) {
+            return openGoldenBox(_class, _module);
+        } else if (_box == Box.MinerBox) {
+            return openMinerBox(_module);
         }
     }
 
@@ -110,28 +115,103 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openSilverBox(
-        address _recipient,
-        Class _class,
-        string memory _module
-    ) external payable {}
+    function openSilverBox(Class _class, uint8 _module)
+        internal
+        view
+        returns (Hero memory hero)
+    {
+        require(_module > 0 && _module <= 100);
 
-    function openGoldenBox(
-        address _recipient,
-        Class _class,
-        string memory _module
-    ) external payable {}
+        hero.class = _class;
+
+        string[] memory heros = classHero[_class];
+        require(heros.length != 0);
+
+        if (_module <= silverBox[0]) {
+            hero.rarity = Rarity.Common;
+        } else if (_module <= silverBox[1]) {
+            hero.rarity = Rarity.Uncommon;
+        } else if (_module <= silverBox[2]) {
+            hero.rarity = Rarity.Rare;
+        } else {
+            hero.rarity = Rarity.Epic;
+        }
+
+        uint256 heroNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
+
+        hero.name = heros[heroNumber];
+    }
+
+    function openGoldenBox(Class _class, uint8 _module)
+        internal
+        view
+        returns (Hero memory hero)
+    {
+        require(_module > 0 && _module <= 100);
+
+        hero.class = _class;
+
+        string[] memory heros = classHero[_class];
+        require(heros.length != 0);
+
+        if (_module <= goldenBox[0]) {
+            hero.rarity = Rarity.Common;
+        } else if (_module <= goldenBox[1]) {
+            hero.rarity = Rarity.Uncommon;
+        } else if (_module <= goldenBox[2]) {
+            hero.rarity = Rarity.Rare;
+        } else {
+            hero.rarity = Rarity.Epic;
+        }
+
+        uint256 heroNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
+
+        hero.name = heros[heroNumber];
+    }
+
+    function openMinerBox(uint8 _module)
+        internal
+        view
+        returns (Hero memory hero)
+    {
+        require(_module > 0 && _module <= 100);
+
+        hero.class = Class.Miner;
+
+        string[] memory heros = classHero[Class.Miner];
+        require(heros.length != 0);
+
+        if (_module <= minerBox[0]) {
+            hero.rarity = Rarity.Common;
+        } else {
+            hero.rarity = Rarity.Uncommon;
+        }
+
+        uint256 heroNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
+
+        hero.name = heros[heroNumber];
+    }
 
     function openGreenBox(
-        address _recipient857,
         Class _class,
-        string memory _module
+        uint8 _module
     ) external payable {}
 
     function openBlueBox(
-        address _recipient,
         Class _class,
-        string memory _module
+        uint8 _module
     ) external payable {}
 
     function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
