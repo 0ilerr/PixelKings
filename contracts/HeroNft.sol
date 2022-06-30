@@ -6,21 +6,41 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract Hero is ERC721URIStorage, Ownable {
+contract HeroNft is ERC721URIStorage, Ownable {
+
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+    mapping(string => string) public heroUri;
 
     constructor() ERC721("Hero", "HR") {}
 
-    struct HeroInfo {
+    struct Hero {
         string name;
-        uint8 class;
-        uint8 rarity;
+        Class class;
+        Rarity rarity;
     }
 
-    HeroInfo[] public herosInfo;
+    enum Class {
+        Shooter,
+        OneShoot,
+        Tank,
+        Explosive,
+        Suport,
+        Dragon,
+        Miner
+    }
 
-    function mintHero(address recipient, string memory tokenURI, string calldata name, uint8 class, uint8 rarity)
+    enum Rarity {
+        CommonStarter,
+        Common,
+        Uncommon,
+        Rare,
+        Epic
+    }
+
+    Hero[] public heros;
+
+    function _mintHero(address recipient, Hero memory hero)
         internal
         returns (uint256)
     {
@@ -28,8 +48,8 @@ contract Hero is ERC721URIStorage, Ownable {
 
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-        herosInfo.push(HeroInfo(name, class, rarity));
+        _setTokenURI(newItemId, heroUri[hero.name]);
+        heros.push(hero);
 
         return newItemId;
     }
