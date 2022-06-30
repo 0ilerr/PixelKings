@@ -19,7 +19,7 @@ contract PixelKingsMarketplace is HeroNft {
     event UpdateHero(string name, string uri);
     event NewHeroNft(uint id, address owner);
 
-    mapping(Box => uint256) public boxPrice;
+    mapping(Box => uint) public boxPrice;
     mapping(address => string) public userBox;
     mapping(Class => string[]) public classHero;
     
@@ -54,8 +54,8 @@ contract PixelKingsMarketplace is HeroNft {
     ) external {
         address sender = _msgSender();
         
-        require(boxesBuyed[sender] >= maxBuy, "Already reached max buy for whitelist");
         require(!privateSale || whitelist[sender], "Open sale has not started");
+        require(boxesBuyed[sender] < maxBuy, "Reached max buy");
 
         // if (privateSale) {
         //     if (!whitelist[sender]) {
