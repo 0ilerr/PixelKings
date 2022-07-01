@@ -222,15 +222,15 @@ contract PixelKingsMarketplace is HeroNft {
 
     function addNewHero(
         Class _class,
-        string memory _hero,
+        string memory _name,
         string memory _uri
     ) external onlyOwner {
         string[] storage heros = classHero[_class];
-        heros.push(_hero);
-        heroUri[_hero] = _uri;
+        heros.push(_name);
+        heroUri[_name] = _uri;
         classHero[_class] = heros;
 
-        emit NewHero(_hero, _class);
+        emit NewHero(_name, _class);
     }
 
     function addToWhitelist(address _address) external onlyOwner {
