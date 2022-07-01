@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { ethers } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 import { PixelKingsMarketplace, BusdMock } from '../typechain-types/contracts';
 
 describe('Marketplace', async () => {
@@ -9,7 +9,7 @@ describe('Marketplace', async () => {
   let busdContract: BusdMock;
   let owner: SignerWithAddress;
   let player: SignerWithAddress;
-  const playerBusdAmount: number = 300;
+  const playerBusdInitialBalance: BigNumber = BigNumber.from(300);
 
   beforeEach(async () => {
     owner = (await ethers.getSigners())[0];
@@ -23,7 +23,7 @@ describe('Marketplace', async () => {
     marketplaceContract = await Marketplace.deploy(busdContract.address);
     await marketplaceContract.deployed();
 
-    await busdContract.connect(player).mint(playerBusdAmount);
+    await busdContract.connect(player).mint(playerBusdInitialBalance);
     
     addHeroesToMarketplace();
   });
@@ -33,10 +33,11 @@ describe('Marketplace', async () => {
     expect(await marketplaceContract.tokenAddress()).to.equal(busdContract.address);
   });
   
-  it('Should buy bronzen box with archer class', async () => {
+  it.only('Should buy bronzen box with archer class', async () => {
     const brozenBoxPrice: BigNumber = BigNumber.from(10);
     const brozenBoxNumber = 0;
     const archerClassNumber = 0;
+    const expectedHeroId = 0;
     
     await marketplaceContract.addToWhitelist(player.address);
 
@@ -44,7 +45,18 @@ describe('Marketplace', async () => {
 
     await expect(marketplaceContract.connect(player).buyBox(brozenBoxNumber, archerClassNumber, 1))
       .to.emit(marketplaceContract, "NewHeroNft")
-      .withArgs(1, player.address);
+      .withArgs(expectedHeroId, player.address);
+      
+      const ownerBusdBalance = await busdContract.balanceOf(owner.address);
+      const playerBusdBalance = await busdContract.balanceOf(player.address);
+      const hero = await marketplaceContract.heros(expectedHeroId);
+
+      expect(ownerBusdBalance).to.equal(brozenBoxPrice);
+      expect(playerBusdBalance).to.equal(playerBusdInitialBalance.sub(brozenBoxPrice));
+
+      expect(await marketplaceContract.ownerOf(expectedHeroId)).to.equal(player.address);
+      expect(hero.class).to.equal(archerClassNumber);
+      // TODO: Arrumar um jeito de verificar a uri e nome do heroi
   })
 
   it('Should revert if the user is not in the white list', async () => {
