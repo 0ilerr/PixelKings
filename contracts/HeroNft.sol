@@ -44,12 +44,12 @@ contract HeroNft is ERC721URIStorage, Ownable {
         internal
         returns (uint256)
     {
-        _tokenIds.increment();
-
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
         _setTokenURI(newItemId, heroUri[hero.name]);
         heros.push(hero);
+
+        _tokenIds.increment();
 
         return newItemId;
     }
