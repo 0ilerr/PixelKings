@@ -18,6 +18,8 @@ contract HeroNft is ERC721URIStorage, Ownable {
         string name;
         Class class;
         Rarity rarity;
+        uint8 level;
+        uint8 season;
     }
 
     enum Class {
