@@ -39,12 +39,13 @@ contract PixelKingsMarketplace is HeroNft {
     constructor(address _tokenAddress) {
         tokenAddress = _tokenAddress;
 
-        boxPrice[Box.BronzenBox] = 10;
-        boxPrice[Box.SilverBox] = 20;
-        boxPrice[Box.GoldenBox] = 30;
-        boxPrice[Box.MinerBox] = 35;
-        boxPrice[Box.GreenBox] = 40;
-        boxPrice[Box.BlueBox] = 50;
+        boxPrice[Box.BronzenBox] = 30;
+        boxPrice[Box.SilverBox] = 50;
+        boxPrice[Box.GoldenBox] = 100;
+        boxPrice[Box.MinerBox] = 100;
+        boxPrice[Box.GreenBox] = 20;
+        boxPrice[Box.BlueBox] = 20;
+        boxPrice[Box.StarterPack] = 50;
     }
 
     modifier isModuleCorrect(uint8 _module) {
@@ -73,27 +74,53 @@ contract PixelKingsMarketplace is HeroNft {
         emit NewHeroNft(id, sender);
     }
 
+    function buyStarterPack(Class _class1, Class _class2) external {
+        address sender = _msgSender();
+
+        require(!privateSale || whitelist[sender], "Open sale has not started");
+        require(boxesBuyed[sender] < maxBuy, "Reached max buy");
+
+        ERC20(tokenAddress).transferFrom(
+            sender,
+            owner(),
+            boxPrice[Box.StarterPack]
+        );
+        Hero memory hero1 = _openBlueBox(_class1);
+        uint256 id = _mintHero(sender, hero1);
+        emit NewHeroNft(id, sender);
+
+        Hero memory hero2 = _openBlueBox(_class2);
+        uint256 id2 = _mintHero(sender, hero2);
+        emit NewHeroNft(id2, sender);
+
+        Hero memory hero3 = _openGreenBox();
+        uint256 id3 = _mintHero(sender, hero3);
+        emit NewHeroNft(id3, sender);
+
+        boxesBuyed[sender]++;
+    }
+
     function _openBox(
         Box _box,
         Class _class,
         uint8 _module
     ) internal view returns (Hero memory hero) {
         if (_box == Box.BronzenBox) {
-            return openBronzenBox(_class, _module);
+            return _openBronzenBox(_class, _module);
         } else if (_box == Box.SilverBox) {
-            return openSilverBox(_class, _module);
+            return _openSilverBox(_class, _module);
         } else if (_box == Box.GoldenBox) {
-            return openGoldenBox(_class, _module);
+            return _openGoldenBox(_class, _module);
         } else if (_box == Box.MinerBox) {
-            return openMinerBox(_module);
+            return _openMinerBox(_module);
         } else if (_box == Box.BlueBox) {
-            return openBlueBox(_class);
+            return _openBlueBox(_class);
         } else if (_box == Box.GreenBox) {
-            return openGreenBox();
+            return _openGreenBox();
         }
     }
 
-    function openBronzenBox(Class _class, uint8 _module)
+    function _openBronzenBox(Class _class, uint8 _module)
         internal
         view
         returns (Hero memory hero)
@@ -120,7 +147,7 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openSilverBox(Class _class, uint8 _module)
+    function _openSilverBox(Class _class, uint8 _module)
         internal
         view
         returns (Hero memory hero)
@@ -149,7 +176,7 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openGoldenBox(Class _class, uint8 _module)
+    function _openGoldenBox(Class _class, uint8 _module)
         internal
         view
         returns (Hero memory hero)
@@ -178,7 +205,7 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openMinerBox(uint8 _module)
+    function _openMinerBox(uint8 _module)
         internal
         view
         returns (Hero memory hero)
@@ -203,7 +230,7 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openBlueBox(Class _class)
+    function _openBlueBox(Class _class)
         internal
         view
         returns (Hero memory hero)
@@ -224,7 +251,7 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openGreenBox() internal view returns (Hero memory hero) {
+    function _openGreenBox() internal view returns (Hero memory hero) {
         hero.class = Class.Miner;
 
         string[] memory heros = classHero[Class.Miner];
