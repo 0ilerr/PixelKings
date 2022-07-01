@@ -12,7 +12,8 @@ contract PixelKingsMarketplace is HeroNft {
         GoldenBox,
         MinerBox,
         GreenBox,
-        BlueBox
+        BlueBox,
+        StarterPack
     }
 
     event NewHero(string name, Class class);
@@ -64,12 +65,6 @@ contract PixelKingsMarketplace is HeroNft {
         require(!privateSale || whitelist[sender], "Open sale has not started");
         require(boxesBuyed[sender] < maxBuy, "Reached max buy");
 
-        // if (privateSale) {
-        //     if (!whitelist[sender]) {
-        //         revert("Open sale has not started");
-        //     }
-        // }
-
         ERC20(tokenAddress).transferFrom(sender, owner(), boxPrice[_box]);
         Hero memory hero = _openBox(_box, _class, _module);
         uint id = _mintHero(sender, hero);
@@ -91,6 +86,10 @@ contract PixelKingsMarketplace is HeroNft {
             return openGoldenBox(_class, _module);
         } else if (_box == Box.MinerBox) {
             return openMinerBox(_module);
+        } else if (_box == Box.BlueBox) {
+            return openBlueBox(_class);
+        } else if (_box == Box.GreenBox) {
+            return openGreenBox();
         }
     }
 
@@ -204,9 +203,43 @@ contract PixelKingsMarketplace is HeroNft {
         hero.name = heros[heroNumber];
     }
 
-    function openGreenBox(Class _class, uint8 _module) external payable {}
+    function openBlueBox(Class _class)
+        internal
+        view
+        returns (Hero memory hero)
+    {
+        hero.class = _class;
 
-    function openBlueBox(Class _class, uint8 _module) external payable {}
+        string[] memory heros = classHero[_class];
+        require(heros.length != 0);
+
+        hero.rarity = Rarity.CommonStarter;
+
+        uint256 heroNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
+
+        hero.name = heros[heroNumber];
+    }
+
+    function openGreenBox() internal view returns (Hero memory hero) {
+        hero.class = Class.Miner;
+
+        string[] memory heros = classHero[Class.Miner];
+        require(heros.length != 0);
+
+        hero.rarity = Rarity.CommonStarter;
+
+        uint256 heroNumber = uint256(
+            keccak256(
+                abi.encodePacked(block.timestamp, msg.sender, heros.length)
+            )
+        ) % heros.length;
+
+        hero.name = heros[heroNumber];
+    }
 
     function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
         boxPrice[_box] = _price;
