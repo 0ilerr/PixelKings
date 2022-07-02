@@ -24,8 +24,11 @@ contract PixelKingsMarketplace is HeroNft {
     mapping(address => string) public userBox;
     mapping(Class => string[]) public classHero;
 
-    mapping(address => bool) private whitelist;
-    mapping(address => uint8) private boxesBuyed;
+    mapping(address => bool) public whitelist;
+    mapping(Box => uint) public availableBoxes;
+    mapping(address => uint8) public playerBoxCount;
+    mapping(address => mapping(Box => uint)) private playerBoxes;
+
     bool private privateSale = true;
     uint8 private maxBuy = 6;
 
@@ -46,6 +49,11 @@ contract PixelKingsMarketplace is HeroNft {
         boxPrice[Box.GreenBox] = 20;
         boxPrice[Box.BlueBox] = 20;
         boxPrice[Box.StarterPack] = 50;
+
+        availableBoxes[Box.BronzenBox] = 5000;
+        availableBoxes[Box.SilverBox] = 3500;
+        availableBoxes[Box.GoldenBox] = 1500;
+        availableBoxes[Box.MinerBox] = 5000;
     }
 
     modifier isModuleCorrect(uint8 _module) {
@@ -56,21 +64,34 @@ contract PixelKingsMarketplace is HeroNft {
         _;
     }
 
-    function buyBox(
-        Box _box,
-        Class _class,
-        uint8 _module
-    ) external isModuleCorrect(_module) {
+    function buyBox(Box _box) external {
         address sender = _msgSender();
 
         require(!privateSale || whitelist[sender], "Open sale has not started");
-        require(boxesBuyed[sender] < maxBuy, "Reached max buy");
+        require(playerBoxCount[sender] < maxBuy, "Reached max buy");
+        
+        playerBoxCount[sender]++;
 
         ERC20(tokenAddress).transferFrom(sender, owner(), boxPrice[_box]);
+
+        playerBoxes[sender][_box]++;
+        availableBoxes[_box]--;
+    }
+
+    function openBox(
+        Box _box,
+        Class _class,
+        uint8 _module
+    ) external {
+        address sender = _msgSender();
+
+        require(playerBoxes[sender][_box] > 0, "Player do not have a box");
+
+        playerBoxes[sender][_box]--;
+
         Hero memory hero = _openBox(_box, _class, _module);
         uint id = _mintHero(sender, hero);
 
-        boxesBuyed[sender]++;
         emit NewHeroNft(id, sender);
     }
 
@@ -78,7 +99,7 @@ contract PixelKingsMarketplace is HeroNft {
         address sender = _msgSender();
 
         require(!privateSale || whitelist[sender], "Open sale has not started");
-        require(boxesBuyed[sender] < maxBuy, "Reached max buy");
+        require(playerBoxCount[sender] < maxBuy, "Reached max buy");
 
         ERC20(tokenAddress).transferFrom(
             sender,
@@ -97,7 +118,7 @@ contract PixelKingsMarketplace is HeroNft {
         uint256 id3 = _mintHero(sender, hero3);
         emit NewHeroNft(id3, sender);
 
-        boxesBuyed[sender]++;
+        playerBoxCount[sender]++;
     }
 
     function _openBox(
