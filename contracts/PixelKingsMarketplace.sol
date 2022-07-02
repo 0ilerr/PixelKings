@@ -320,7 +320,12 @@ contract PixelKingsMarketplace is HeroNft {
 
     // TODO: Should we add removeFromWhiteList ??
 
-    function finishprivateSale() external onlyOwner {
+    function finishPrivateSale() external onlyOwner {
         privateSale = false;
+
+        availableBoxes[Box.BronzenBox] = 2500;
+        availableBoxes[Box.SilverBox] = 1500;
+        availableBoxes[Box.GoldenBox] = 1000;
+        availableBoxes[Box.MinerBox] = 2500;
     }
 }
