@@ -18,24 +18,24 @@ contract PixelKingsMarketplace is HeroNft {
 
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
-    event NewHeroNft(uint id, address owner);
+    event NewHeroNft(uint256 id, address owner);
 
-    mapping(Box => uint) public boxPrice;
+    mapping(Box => uint256) public boxPrice;
     mapping(address => string) public userBox;
     mapping(Class => string[]) public classHero;
 
     mapping(address => bool) public whitelist;
-    mapping(Box => uint) public availableBoxes;
+    mapping(Box => uint256) public availableBoxes;
     mapping(address => uint8) public playerBoxCount;
-    mapping(address => mapping(Box => uint)) private playerBoxes;
+    mapping(address => mapping(Box => uint256)) private playerBoxes;
 
     bool private privateSale = true;
     uint8 private maxBuy = 6;
 
-    uint[2] private bronzenBox = [80, 98];
-    uint[3] private silverBox = [60, 92, 98];
-    uint[3] private goldenBox = [30, 75, 95];
-    uint[1] private minerBox = [90];
+    uint256[2] private bronzenBox = [80, 98];
+    uint256[3] private silverBox = [60, 92, 98];
+    uint256[3] private goldenBox = [30, 75, 95];
+    uint256[1] private minerBox = [90];
 
     address public tokenAddress;
 
@@ -69,7 +69,7 @@ contract PixelKingsMarketplace is HeroNft {
 
         require(!privateSale || whitelist[sender], "Open sale has not started");
         require(playerBoxCount[sender] < maxBuy, "Reached max buy");
-        
+
         playerBoxCount[sender]++;
 
         ERC20(tokenAddress).transferFrom(sender, owner(), boxPrice[_box]);
@@ -90,7 +90,7 @@ contract PixelKingsMarketplace is HeroNft {
         playerBoxes[sender][_box]--;
 
         Hero memory hero = _openBox(_box, _class, _module);
-        uint id = _mintHero(sender, hero);
+        uint256 id = _mintHero(sender, hero);
 
         emit NewHeroNft(id, sender);
     }
@@ -126,167 +126,101 @@ contract PixelKingsMarketplace is HeroNft {
         Class _class,
         uint8 _module
     ) internal view returns (Hero memory hero) {
+        string[] memory heros = classHero[_class];
+        require(heros.length != 0);
+
+        uint randomNumber = generateRandom(_module);
+        uint rarityNumber = randomNumber % 100;
+        uint heroNumber = randomNumber % heros.length;
+
+        hero.name = heros[heroNumber];
+        hero.class = _class;
+        hero.rarity = _generateRarity(_box, rarityNumber);
+    }
+
+    function _generateRarity(Box _box, uint rarityNumber)
+        internal
+        view
+        returns (Rarity rarity)
+    {
+        rarity = Rarity.Common;
         if (_box == Box.BronzenBox) {
-            return _openBronzenBox(_class, _module);
+            rarity = _generateRarityForBronzenBox(rarityNumber);
         } else if (_box == Box.SilverBox) {
-            return _openSilverBox(_class, _module);
+            rarity = _generateRarityForSilverBox(rarityNumber);
         } else if (_box == Box.GoldenBox) {
-            return _openGoldenBox(_class, _module);
+            rarity = _generateRarityForGoldenBox(rarityNumber);
         } else if (_box == Box.MinerBox) {
-            return _openMinerBox(_module);
-        } else if (_box == Box.BlueBox) {
-            return _openBlueBox(_class);
-        } else if (_box == Box.GreenBox) {
-            return _openGreenBox();
+            rarity = _generateRarityForMinerBox(rarityNumber);
+        } else if (_box == Box.BlueBox || _box == Box.GreenBox) {
+            rarity = Box.CommonStarter;
         }
     }
 
-    function _openBronzenBox(Class _class, uint8 _module)
+    function _generateRarityForBronzenBox(uint rarityNumber)
         internal
         view
-        returns (Hero memory hero)
+        returns (Rarity rarity)
     {
-        hero.class = _class;
-
-        string[] memory heros = classHero[_class];
-        require(heros.length != 0);
-
-        if (_module <= bronzenBox[0]) {
-            hero.rarity = Rarity.Common;
-        } else if (_module <= bronzenBox[1]) {
-            hero.rarity = Rarity.Uncommon;
+        if (rarityNumber <= bronzenBox[0]) {
+            rarity = Rarity.Common;
+        } else if (rarityNumber <= bronzenBox[1]) {
+            rarity = Rarity.Uncommon;
         } else {
-            hero.rarity = Rarity.Rare;
+            rarity = Rarity.Rare;
         }
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
     }
 
-    function _openSilverBox(Class _class, uint8 _module)
+    function _generateRarityForSilverBox(uint rarityNumber)
         internal
         view
-        returns (Hero memory hero)
+        returns (Rarity rarity)
     {
-        hero.class = _class;
-
-        string[] memory heros = classHero[_class];
-        require(heros.length != 0);
-
-        if (_module <= silverBox[0]) {
-            hero.rarity = Rarity.Common;
-        } else if (_module <= silverBox[1]) {
-            hero.rarity = Rarity.Uncommon;
-        } else if (_module <= silverBox[2]) {
-            hero.rarity = Rarity.Rare;
+        if (rarityNumber <= silverBox[0]) {
+            rarity = Rarity.Common;
+        } else if (rarityNumber <= silverBox[1]) {
+            rarity = Rarity.Uncommon;
+        } else if (rarityNumber <= silverBox[2]) { 
+            rarity = Rarity.Rare;
         } else {
-            hero.rarity = Rarity.Epic;
+            rarity = Rarity.Epic;
         }
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
     }
 
-    function _openGoldenBox(Class _class, uint8 _module)
+    function _generateRarityForGoldenBox(uint rarityNumber)
         internal
         view
-        returns (Hero memory hero)
+        returns (Rarity rarity)
     {
-        hero.class = _class;
-
-        string[] memory heros = classHero[_class];
-        require(heros.length != 0);
-
-        if (_module <= goldenBox[0]) {
-            hero.rarity = Rarity.Common;
-        } else if (_module <= goldenBox[1]) {
-            hero.rarity = Rarity.Uncommon;
-        } else if (_module <= goldenBox[2]) {
-            hero.rarity = Rarity.Rare;
+        if (rarityNumber <= goldenBox[0]) {
+            rarity = Rarity.Common;
+        } else if (rarityNumber <= goldenBox[1]) {
+            rarity = Rarity.Uncommon;
+        } else if (rarityNumber <= goldenBox[2]) { 
+            rarity = Rarity.Rare;
         } else {
-            hero.rarity = Rarity.Epic;
+            rarity = Rarity.Epic;
         }
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
     }
 
-    function _openMinerBox(uint8 _module)
+    function _generateRarityForMinerBox(uint rarityNumber)
         internal
         view
-        returns (Hero memory hero)
+        returns (Rarity rarity)
     {
-        hero.class = Class.Miner;
-
-        string[] memory heros = classHero[Class.Miner];
-        require(heros.length != 0);
-
-        if (_module <= minerBox[0]) {
-            hero.rarity = Rarity.Common;
+        if (rarityNumber <= minerBox[0]) {
+            rarity = Rarity.Common;
         } else {
-            hero.rarity = Rarity.Uncommon;
+            rarity = Rarity.Uncommon;
         }
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
     }
 
-    function _openBlueBox(Class _class)
+    function _generateRarityForMinerBox(uint rarityNumber)
         internal
         view
-        returns (Hero memory hero)
+        returns (Rarity)
     {
-        hero.class = _class;
-
-        string[] memory heros = classHero[_class];
-        require(heros.length != 0);
-
-        hero.rarity = Rarity.CommonStarter;
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
-    }
-
-    function _openGreenBox() internal view returns (Hero memory hero) {
-        hero.class = Class.Miner;
-
-        string[] memory heros = classHero[Class.Miner];
-        require(heros.length != 0);
-
-        hero.rarity = Rarity.CommonStarter;
-
-        uint256 heroNumber = uint256(
-            keccak256(
-                abi.encodePacked(block.timestamp, msg.sender, heros.length)
-            )
-        ) % heros.length;
-
-        hero.name = heros[heroNumber];
+        return Rarity.CommonStarter;
     }
 
     function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
@@ -319,6 +253,19 @@ contract PixelKingsMarketplace is HeroNft {
     }
 
     // TODO: Should we add removeFromWhiteList ??
+
+    function generateRandom(uint256 _module) internal view returns (uint256) {
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        blockhash(block.number - 1),
+                        msg.sender,
+                        _module
+                    )
+                )
+            );
+    }
 
     function finishPrivateSale() external onlyOwner {
         privateSale = false;
