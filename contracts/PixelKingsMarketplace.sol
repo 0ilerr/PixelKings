@@ -153,7 +153,7 @@ contract PixelKingsMarketplace is HeroNft {
         } else if (_box == Box.MinerBox) {
             rarity = _generateRarityForMinerBox(rarityNumber);
         } else if (_box == Box.BlueBox || _box == Box.GreenBox) {
-            rarity = Box.CommonStarter;
+            rarity = Rarity.CommonStarter;
         }
     }
 
