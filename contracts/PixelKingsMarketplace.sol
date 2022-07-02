@@ -215,14 +215,6 @@ contract PixelKingsMarketplace is HeroNft {
         }
     }
 
-    function _generateRarityForMinerBox(uint rarityNumber)
-        internal
-        view
-        returns (Rarity)
-    {
-        return Rarity.CommonStarter;
-    }
-
     function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
         boxPrice[_box] = _price;
     }
