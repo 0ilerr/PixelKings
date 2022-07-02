@@ -106,17 +106,17 @@ contract PixelKingsMarketplace is HeroNft {
             owner(),
             boxPrice[Box.StarterPack]
         );
-        Hero memory hero1 = _openBlueBox(_class1);
-        uint256 id = _mintHero(sender, hero1);
-        emit NewHeroNft(id, sender);
+        // Hero memory hero1 = _openBlueBox(_class1);
+        // uint256 id = _mintHero(sender, hero1);
+        // emit NewHeroNft(id, sender);
 
-        Hero memory hero2 = _openBlueBox(_class2);
-        uint256 id2 = _mintHero(sender, hero2);
-        emit NewHeroNft(id2, sender);
+        // Hero memory hero2 = _openBlueBox(_class2);
+        // uint256 id2 = _mintHero(sender, hero2);
+        // emit NewHeroNft(id2, sender);
 
-        Hero memory hero3 = _openGreenBox();
-        uint256 id3 = _mintHero(sender, hero3);
-        emit NewHeroNft(id3, sender);
+        // Hero memory hero3 = _openGreenBox();
+        // uint256 id3 = _mintHero(sender, hero3);
+        // emit NewHeroNft(id3, sender);
 
         playerBoxCount[sender]++;
     }
