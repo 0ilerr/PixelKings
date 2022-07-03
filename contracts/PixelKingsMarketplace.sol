@@ -117,15 +117,15 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
     ) external {
         address sender = _msgSender();
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
-        uint256 id = _mintHero(sender, hero1);
+        uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
         emit NewHeroNft(id, sender);
 
         Hero memory hero2 = _openBox(Box.BlueBox, _class2, _module);
-        uint256 id2 = _mintHero(sender, hero2);
+        uint256 id2 = HeroNft(heroNft).mintHero(sender, hero2);
         emit NewHeroNft(id2, sender);
 
         Hero memory hero3 = _openBox(Box.GreenBox, Class.Miner, _module);
-        uint256 id3 = _mintHero(sender, hero3);
+        uint256 id3 = HeroNft(heroNft).mintHero(sender, hero3);
         emit NewHeroNft(id3, sender);
     }
 
