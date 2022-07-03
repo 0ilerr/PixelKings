@@ -99,30 +99,40 @@ contract PixelKingsMarketplace is HeroNft {
         emit NewHeroNft(id, sender);
     }
 
-    function buyStarterPack(Class _class1, Class _class2) external {
+    function buyStarterPack() external {
         address sender = _msgSender();
 
         require(!privateSale || whitelist[sender], "Open sale has not started");
         require(playerBoxCount[sender] < maxBuy, "Reached max buy");
+
+        playerBoxCount[sender]++;
 
         ERC20(tokenAddress).transferFrom(
             sender,
             owner(),
             boxPrice[Box.StarterPack]
         );
-        // Hero memory hero1 = _openBlueBox(_class1);
-        // uint256 id = _mintHero(sender, hero1);
-        // emit NewHeroNft(id, sender);
+        playerBoxes[sender][Box.StarterPack]++;
+        availableBoxes[Box.StarterPack]--;
+    }
 
-        // Hero memory hero2 = _openBlueBox(_class2);
-        // uint256 id2 = _mintHero(sender, hero2);
-        // emit NewHeroNft(id2, sender);
+    function openStarterPack(
+        Class _class1,
+        Class _class2,
+        uint8 _module
+    ) external {
+        address sender = _msgSender();
+        Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
+        uint256 id = _mintHero(sender, hero1);
+        emit NewHeroNft(id, sender);
 
-        // Hero memory hero3 = _openGreenBox();
-        // uint256 id3 = _mintHero(sender, hero3);
-        // emit NewHeroNft(id3, sender);
+        Hero memory hero2 = _openBox(Box.BlueBox, _class2, _module);
+        uint256 id2 = _mintHero(sender, hero2);
+        emit NewHeroNft(id2, sender);
 
-        playerBoxCount[sender]++;
+        Hero memory hero3 = _openBox(Box.GreenBox, Class.Miner, _module);
+        uint256 id3 = _mintHero(sender, hero3);
+        emit NewHeroNft(id3, sender);
     }
 
     function _openBox(
@@ -133,16 +143,16 @@ contract PixelKingsMarketplace is HeroNft {
         string[] memory heros = classHero[_class];
         require(heros.length != 0);
 
-        uint randomNumber = generateRandom(_module);
-        uint rarityNumber = randomNumber % 100;
-        uint heroNumber = randomNumber % heros.length;
+        uint256 randomNumber = generateRandom(_module);
+        uint256 rarityNumber = randomNumber % 100;
+        uint256 heroNumber = randomNumber % heros.length;
 
         hero.name = heros[heroNumber];
         hero.class = _class;
         hero.rarity = _generateRarity(_box, rarityNumber);
     }
 
-    function _generateRarity(Box _box, uint rarityNumber)
+    function _generateRarity(Box _box, uint256 rarityNumber)
         internal
         view
         returns (Rarity rarity)
@@ -161,7 +171,7 @@ contract PixelKingsMarketplace is HeroNft {
         }
     }
 
-    function _generateRarityForBronzenBox(uint rarityNumber)
+    function _generateRarityForBronzenBox(uint256 rarityNumber)
         internal
         view
         returns (Rarity rarity)
@@ -175,7 +185,7 @@ contract PixelKingsMarketplace is HeroNft {
         }
     }
 
-    function _generateRarityForSilverBox(uint rarityNumber)
+    function _generateRarityForSilverBox(uint256 rarityNumber)
         internal
         view
         returns (Rarity rarity)
@@ -184,14 +194,14 @@ contract PixelKingsMarketplace is HeroNft {
             rarity = Rarity.Common;
         } else if (rarityNumber <= silverBox[1]) {
             rarity = Rarity.Uncommon;
-        } else if (rarityNumber <= silverBox[2]) { 
+        } else if (rarityNumber <= silverBox[2]) {
             rarity = Rarity.Rare;
         } else {
             rarity = Rarity.Epic;
         }
     }
 
-    function _generateRarityForGoldenBox(uint rarityNumber)
+    function _generateRarityForGoldenBox(uint256 rarityNumber)
         internal
         view
         returns (Rarity rarity)
@@ -200,14 +210,14 @@ contract PixelKingsMarketplace is HeroNft {
             rarity = Rarity.Common;
         } else if (rarityNumber <= goldenBox[1]) {
             rarity = Rarity.Uncommon;
-        } else if (rarityNumber <= goldenBox[2]) { 
+        } else if (rarityNumber <= goldenBox[2]) {
             rarity = Rarity.Rare;
         } else {
             rarity = Rarity.Epic;
         }
     }
 
-    function _generateRarityForMinerBox(uint rarityNumber)
+    function _generateRarityForMinerBox(uint256 rarityNumber)
         internal
         view
         returns (Rarity rarity)
@@ -268,7 +278,7 @@ contract PixelKingsMarketplace is HeroNft {
         availableBoxes[Box.SilverBox] += 1500;
         availableBoxes[Box.GoldenBox] += 1000;
         availableBoxes[Box.MinerBox] += 2500;
-        
+
         availableBoxes[Box.GreenBox] += 125;
         availableBoxes[Box.BlueBox] += 250;
         availableBoxes[Box.StarterPack] += 125;
