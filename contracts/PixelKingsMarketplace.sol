@@ -54,6 +54,10 @@ contract PixelKingsMarketplace is HeroNft {
         availableBoxes[Box.SilverBox] = 3500;
         availableBoxes[Box.GoldenBox] = 1500;
         availableBoxes[Box.MinerBox] = 5000;
+
+        availableBoxes[Box.GreenBox] = 250;
+        availableBoxes[Box.BlueBox] = 500;
+        availableBoxes[Box.StarterPack] = 250;
     }
 
     modifier isModuleCorrect(uint8 _module) {
@@ -244,8 +248,6 @@ contract PixelKingsMarketplace is HeroNft {
         whitelist[_address] = true;
     }
 
-    // TODO: Should we add removeFromWhiteList ??
-
     function generateRandom(uint256 _module) internal view returns (uint256) {
         return
             uint256(
@@ -262,9 +264,13 @@ contract PixelKingsMarketplace is HeroNft {
     function finishPrivateSale() external onlyOwner {
         privateSale = false;
 
-        availableBoxes[Box.BronzenBox] = 2500;
-        availableBoxes[Box.SilverBox] = 1500;
-        availableBoxes[Box.GoldenBox] = 1000;
-        availableBoxes[Box.MinerBox] = 2500;
+        availableBoxes[Box.BronzenBox] += 2500;
+        availableBoxes[Box.SilverBox] += 1500;
+        availableBoxes[Box.GoldenBox] += 1000;
+        availableBoxes[Box.MinerBox] += 2500;
+        
+        availableBoxes[Box.GreenBox] += 125;
+        availableBoxes[Box.BlueBox] += 250;
+        availableBoxes[Box.StarterPack] += 125;
     }
 }
