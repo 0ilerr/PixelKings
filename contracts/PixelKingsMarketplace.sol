@@ -4,17 +4,9 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./HeroNft.sol";
+import "./PixelKingsUtils.sol";
 
-contract PixelKingsMarketplace is HeroNft {
-    enum Box {
-        BronzenBox,
-        SilverBox,
-        GoldenBox,
-        MinerBox,
-        GreenBox,
-        BlueBox,
-        StarterPack
-    }
+contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
 
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
@@ -38,9 +30,11 @@ contract PixelKingsMarketplace is HeroNft {
     uint256[1] private minerBox = [90];
 
     address public tokenAddress;
+    address public heroNft;
 
-    constructor(address _tokenAddress) {
+    constructor(address _tokenAddress, address _heroNft) {
         tokenAddress = _tokenAddress;
+        heroNft = _heroNft;
 
         boxPrice[Box.BronzenBox] = 30;
         boxPrice[Box.SilverBox] = 50;
@@ -90,7 +84,7 @@ contract PixelKingsMarketplace is HeroNft {
         playerBoxes[sender][_box]--;
 
         Hero memory hero = _openBox(_box, _class, _module);
-        uint256 id = _mintHero(sender, hero);
+        uint256 id = HeroNft(heroNft).mintHero(sender, hero);
 
         emit NewHeroNft(id, sender);
     }
