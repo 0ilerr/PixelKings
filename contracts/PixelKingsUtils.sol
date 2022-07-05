@@ -38,5 +38,5 @@ contract PixelKingsUtils {
         uint8 season;
     }
 
-    mapping(string => string) public heroUri;
+    mapping(string => mapping(Rarity => string)) public heroUri;
 }
