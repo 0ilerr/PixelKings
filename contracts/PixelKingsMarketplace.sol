@@ -7,7 +7,7 @@ import "./HeroNft.sol";
 import "./PixelKingsUtils.sol";
 
 contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
-
+    
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
     event NewHeroNft(uint256 id, address owner);
@@ -227,22 +227,24 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         boxPrice[_box] = _price;
     }
 
-    function updateHeroUri(string memory _hero, string memory _uri)
-        external
-        onlyOwner
-    {
-        heroUri[_hero] = _uri;
+    function updateHeroUri(
+        string memory _hero,
+        Rarity rarity,
+        string memory _uri
+    ) external onlyOwner {
+        heroUri[_hero][rarity] = _uri;
         emit UpdateHero(_hero, _uri);
     }
 
     function addNewHero(
         Class _class,
         string memory _name,
+        Rarity rarity,
         string memory _uri
     ) external onlyOwner {
         string[] storage heros = classHero[_class];
         heros.push(_name);
-        heroUri[_name] = _uri;
+        heroUri[_name][rarity] = _uri;
         classHero[_class] = heros;
 
         emit NewHero(_name, _class);
