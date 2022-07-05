@@ -28,7 +28,7 @@ contract HeroNft is ERC721URIStorage, AccessControl, PixelKingsUtils {
     {
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId, heroUri[hero.name]);
+        _setTokenURI(newItemId, heroUri[hero.name][hero.rarity]);
         heros.push(hero);
 
         _tokenIds.increment();
