@@ -13,7 +13,6 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
     event NewHeroNft(uint256 id, address owner);
 
     mapping(Box => uint256) public boxPrice;
-    mapping(address => string) public userBox;
     mapping(Class => string[]) public classHero;
 
     mapping(address => bool) public whitelist;
@@ -80,7 +79,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Box _box,
         Class _class,
         uint8 _module
-    ) external {
+    ) external isModuleCorrect(_module) {
         address sender = _msgSender();
 
         require(playerBoxes[sender][_box] > 0, "Player do not have a box");
@@ -114,7 +113,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Class _class1,
         Class _class2,
         uint8 _module
-    ) external {
+    ) external isModuleCorrect(_module) {
         address sender = _msgSender();
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
         uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
