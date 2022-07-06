@@ -112,7 +112,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         uint8 _module
     ) external {
         address sender = _msgSender();
-
+        //TODO: Criar função privada para essas 3 operações e chamar a função 3 vezes
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
         uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
         emit NewHeroNft(id, sender);
