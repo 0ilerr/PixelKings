@@ -96,11 +96,13 @@ contract PixelKingsMarketplace is PixelKingsUtils {
 
         playerBoxCount[sender]++;
 
+        /*
         ERC20(tokenAddress).transferFrom(
             sender,
             owner(),
             boxPrice[Box.StarterPack]
         );
+        */
         playerBoxes[sender][Box.StarterPack]++;
         availableBoxes[Box.StarterPack]--;
     }
