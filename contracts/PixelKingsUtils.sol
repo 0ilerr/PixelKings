@@ -61,9 +61,9 @@ contract PixelKingsUtils is AccessControl {
 
     function setModerator(address moderator)
         external
-        onlyRole(MODERATOR_ROLE)
+        onlyRole(DEFAULT_ADMIN_ROLE)
         zeroAddressNotAllowed(moderator)
     {
-        _grantRole(MARKETPLACE_ROLE, moderator);
+        _grantRole(MODERATOR_ROLE, moderator);
     }
 }
