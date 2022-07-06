@@ -3,11 +3,12 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./HeroNft.sol";
 import "./PixelKingsUtils.sol";
 
-contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
 
+contract PixelKingsMarketplace is PixelKingsUtils {
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
     event NewHeroNft(uint256 id, address owner);
@@ -31,9 +32,12 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
     address public tokenAddress;
     address public heroNft;
 
-    constructor(address _tokenAddress, address _heroNft) {
+    constructor(address _tokenAddress, address _heroNftAddress, address _owner) {
         tokenAddress = _tokenAddress;
-        heroNft = _heroNft;
+        heroNft = _heroNftAddress;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, _owner);
+        _grantRole(MODERATOR_ROLE, _msgSender());
 
         boxPrice[Box.BronzenBox] = 30;
         boxPrice[Box.SilverBox] = 50;
@@ -53,14 +57,6 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         availableBoxes[Box.StarterPack] = 250;
     }
 
-    modifier isModuleCorrect(uint8 _module) {
-        require(
-            _module > 0 && _module <= 100,
-            "Module must be between 0 and 100"
-        );
-        _;
-    }
-
     function buyBox(Box _box) external {
         address sender = _msgSender();
 
@@ -69,7 +65,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
 
         playerBoxCount[sender]++;
 
-        ERC20(tokenAddress).transferFrom(sender, owner(), boxPrice[_box]);
+        //ERC20(tokenAddress).transferFrom(sender, , boxPrice[_box]);
 
         playerBoxes[sender][_box]++;
         availableBoxes[_box]--;
@@ -79,7 +75,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Box _box,
         Class _class,
         uint8 _module
-    ) external isModuleCorrect(_module) {
+    ) external {
         address sender = _msgSender();
 
         require(playerBoxes[sender][_box] > 0, "Player do not have a box");
@@ -100,11 +96,13 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
 
         playerBoxCount[sender]++;
 
+        /*
         ERC20(tokenAddress).transferFrom(
             sender,
             owner(),
             boxPrice[Box.StarterPack]
         );
+        */
         playerBoxes[sender][Box.StarterPack]++;
         availableBoxes[Box.StarterPack]--;
     }
@@ -113,7 +111,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Class _class1,
         Class _class2,
         uint8 _module
-    ) external isModuleCorrect(_module) {
+    ) external {
         address sender = _msgSender();
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
         uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
@@ -222,7 +220,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         }
     }
 
-    function updateBoxPrice(Box _box, uint256 _price) external onlyOwner {
+    function updateBoxPrice(Box _box, uint256 _price) external onlyRole(MODERATOR_ROLE) {
         boxPrice[_box] = _price;
     }
 
@@ -230,12 +228,18 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         string memory _hero,
         Rarity rarity,
         string memory _uri
-    ) external onlyOwner {
+    ) external onlyRole(MODERATOR_ROLE) {
         heroUri[_hero][rarity] = _uri;
         emit UpdateHero(_hero, _uri);
     }
 
-    function addNewHero(Class _class, string memory _name) external onlyOwner {
+
+    function addNewHero(
+        Class _class,
+        string memory _name,
+        Rarity rarity,
+        string memory _uri
+    ) external onlyRole(MODERATOR_ROLE) {
         string[] storage heros = classHero[_class];
         heros.push(_name);
         classHero[_class] = heros;
@@ -243,7 +247,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         emit NewHero(_name, _class);
     }
 
-    function addToWhitelist(address _address) external onlyOwner {
+    function addToWhitelist(address _address) external onlyRole(MODERATOR_ROLE) {
         whitelist[_address] = true;
     }
 
@@ -260,7 +264,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
             );
     }
 
-    function finishPrivateSale() external onlyOwner {
+    function finishPrivateSale() external onlyRole(MODERATOR_ROLE) {
         privateSale = false;
 
         availableBoxes[Box.BronzenBox] += 2500;
