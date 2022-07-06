@@ -7,8 +7,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./HeroNft.sol";
 import "./PixelKingsUtils.sol";
 
+
 contract PixelKingsMarketplace is PixelKingsUtils {
-    
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
     event NewHeroNft(uint256 id, address owner);
@@ -132,7 +132,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         uint8 _module
     ) internal view returns (Hero memory hero) {
         string[] memory heros = classHero[_class];
-        require(heros.length != 0);
+        require(heros.length > 0, "This hero class does not exist");
 
         uint256 randomNumber = generateRandom(_module);
         uint256 rarityNumber = randomNumber % 100;
@@ -233,6 +233,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         emit UpdateHero(_hero, _uri);
     }
 
+
     function addNewHero(
         Class _class,
         string memory _name,
@@ -241,7 +242,6 @@ contract PixelKingsMarketplace is PixelKingsUtils {
     ) external onlyRole(MODERATOR_ROLE) {
         string[] storage heros = classHero[_class];
         heros.push(_name);
-        heroUri[_name][rarity] = _uri;
         classHero[_class] = heros;
 
         emit NewHero(_name, _class);
