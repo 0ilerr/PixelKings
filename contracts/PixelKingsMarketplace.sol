@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./HeroNft.sol";
 import "./PixelKingsUtils.sol";
 
-
 contract PixelKingsMarketplace is PixelKingsUtils {
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
@@ -76,6 +75,8 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         Class _class,
         uint8 _module
     ) external {
+        require(_box != Box.StarterPack, "Starter pack must be open through openStarterPack function");
+
         address sender = _msgSender();
 
         require(playerBoxes[sender][_box] > 0, "Player do not have a box");
@@ -86,44 +87,6 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         uint256 id = HeroNft(heroNft).mintHero(sender, hero);
 
         emit NewHeroNft(id, sender);
-    }
-
-    function buyStarterPack() external {
-        address sender = _msgSender();
-
-        require(!privateSale || whitelist[sender], "Open sale has not started");
-        require(playerBoxCount[sender] < maxBuy, "Reached max buy");
-
-        playerBoxCount[sender]++;
-
-        /*
-        ERC20(tokenAddress).transferFrom(
-            sender,
-            owner(),
-            boxPrice[Box.StarterPack]
-        );
-        */
-        playerBoxes[sender][Box.StarterPack]++;
-        availableBoxes[Box.StarterPack]--;
-    }
-
-    function openStarterPack(
-        Class _class1,
-        Class _class2,
-        uint8 _module
-    ) external {
-        address sender = _msgSender();
-        Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
-        uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
-        emit NewHeroNft(id, sender);
-
-        Hero memory hero2 = _openBox(Box.BlueBox, _class2, _module);
-        uint256 id2 = HeroNft(heroNft).mintHero(sender, hero2);
-        emit NewHeroNft(id2, sender);
-
-        Hero memory hero3 = _openBox(Box.GreenBox, Class.Miner, _module);
-        uint256 id3 = HeroNft(heroNft).mintHero(sender, hero3);
-        emit NewHeroNft(id3, sender);
     }
 
     function _openBox(
@@ -141,6 +104,26 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         hero.name = heros[heroNumber];
         hero.class = _class;
         hero.rarity = _generateRarity(_box, rarityNumber);
+    }
+
+    function openStarterPack(
+        Class _class1,
+        Class _class2,
+        uint8 _module
+    ) external {
+        address sender = _msgSender();
+
+        Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
+        uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
+        emit NewHeroNft(id, sender);
+
+        Hero memory hero2 = _openBox(Box.BlueBox, _class2, _module);
+        uint256 id2 = HeroNft(heroNft).mintHero(sender, hero2);
+        emit NewHeroNft(id2, sender);
+
+        Hero memory hero3 = _openBox(Box.GreenBox, Class.Miner, _module);
+        uint256 id3 = HeroNft(heroNft).mintHero(sender, hero3);
+        emit NewHeroNft(id3, sender);
     }
 
     function _generateRarity(Box _box, uint256 rarityNumber)
