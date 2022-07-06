@@ -53,14 +53,6 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         availableBoxes[Box.StarterPack] = 250;
     }
 
-    modifier isModuleCorrect(uint8 _module) {
-        require(
-            _module > 0 && _module <= 100,
-            "Module must be between 0 and 100"
-        );
-        _;
-    }
-
     function buyBox(Box _box) external {
         address sender = _msgSender();
 
@@ -79,7 +71,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Box _box,
         Class _class,
         uint8 _module
-    ) external isModuleCorrect(_module) {
+    ) external {
         address sender = _msgSender();
 
         require(playerBoxes[sender][_box] > 0, "Player do not have a box");
@@ -113,7 +105,7 @@ contract PixelKingsMarketplace is PixelKingsUtils, Ownable {
         Class _class1,
         Class _class2,
         uint8 _module
-    ) external isModuleCorrect(_module) {
+    ) external {
         address sender = _msgSender();
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
         uint256 id = HeroNft(heroNft).mintHero(sender, hero1);

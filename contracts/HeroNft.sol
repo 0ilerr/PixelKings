@@ -14,9 +14,9 @@ contract HeroNft is ERC721URIStorage, AccessControl, PixelKingsUtils {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
     bytes32 public constant MARKETPLACE_ROLE = keccak256("MARKETPLACE_ROLE");
 
-    constructor(address moderator) ERC721("Hero", "HR") {
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(MODERATOR_ROLE, moderator);
+    constructor(address owner) ERC721("Hero", "HR") {
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(MODERATOR_ROLE, _msgSender());
     }
 
     Hero[] public heros;
