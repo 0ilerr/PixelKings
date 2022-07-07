@@ -7,14 +7,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./HeroNft.sol";
 import "./PixelKingsUtils.sol";
 
-
 contract PixelKingsMarketplace is PixelKingsUtils {
     event NewHero(string name, Class class);
     event UpdateHero(string name, string uri);
     event NewHeroNft(uint256 id, address owner);
 
     mapping(Box => uint256) public boxPrice;
-    mapping(Class => string[]) public classHero;
+    mapping(Class => string[]) public classToHeros;
 
     mapping(address => bool) public whitelist;
     mapping(Box => uint256) public availableBoxes;
@@ -32,7 +31,11 @@ contract PixelKingsMarketplace is PixelKingsUtils {
     address public tokenAddress;
     address public heroNft;
 
-    constructor(address _tokenAddress, address _heroNftAddress, address _owner) {
+    constructor(
+        address _tokenAddress,
+        address _heroNftAddress,
+        address _owner
+    ) {
         tokenAddress = _tokenAddress;
         heroNft = _heroNftAddress;
 
@@ -131,7 +134,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         Class _class,
         uint8 _module
     ) internal view returns (Hero memory hero) {
-        string[] memory heros = classHero[_class];
+        string[] memory heros = classToHeros[_class];
         require(heros.length > 0, "This hero class does not exist");
 
         uint256 randomNumber = generateRandom(_module);
@@ -220,19 +223,21 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         }
     }
 
-    function updateBoxPrice(Box _box, uint256 _price) external onlyRole(MODERATOR_ROLE) {
+    function updateBoxPrice(Box _box, uint256 _price)
+        external
+        onlyRole(MODERATOR_ROLE)
+    {
         boxPrice[_box] = _price;
     }
 
     function updateHeroUri(
-        string memory _hero,
+        string memory _heroName,
         Rarity rarity,
         string memory _uri
     ) external onlyRole(MODERATOR_ROLE) {
-        heroUri[_hero][rarity] = _uri;
-        emit UpdateHero(_hero, _uri);
+        heroUri[_heroName][rarity] = _uri;
+        emit UpdateHero(_heroName, _uri);
     }
-
 
     function addNewHero(
         Class _class,
@@ -240,14 +245,30 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         Rarity rarity,
         string memory _uri
     ) external onlyRole(MODERATOR_ROLE) {
-        string[] storage heros = classHero[_class];
-        heros.push(_name);
-        classHero[_class] = heros;
+        string[] memory heros = classToHeros[_class];
 
-        emit NewHero(_name, _class);
+        uint256 herosLength = heros.length;
+
+        for (uint256 i; i < herosLength; i++) {
+            if (
+                keccak256(abi.encodePacked(heros[i])) ==
+                keccak256(abi.encodePacked(_name))
+            ) {
+                heroUri[_name][rarity] = _uri;
+                emit UpdateHero(_name, _uri);
+            } else {
+                heros[herosLength] = _name;
+                classToHeros[_class] = heros;
+                heroUri[_name][rarity] = _uri;
+                emit NewHero(_name, _class);
+            }
+        }
     }
 
-    function addToWhitelist(address _address) external onlyRole(MODERATOR_ROLE) {
+    function addToWhitelist(address _address)
+        external
+        onlyRole(MODERATOR_ROLE)
+    {
         whitelist[_address] = true;
     }
 
