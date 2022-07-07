@@ -241,6 +241,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
                 keccak256(abi.encodePacked(_name))
             ) {
                 heroAlreadyAdded = true;
+                break;
             }
         }
 
