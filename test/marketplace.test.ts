@@ -9,6 +9,7 @@ describe('Marketplace', async () => {
   let heroNftContract: HeroNft;
   let busdContract: BusdMock;
   let owner: SignerWithAddress;
+  let moderator: SignerWithAddress;
   let player: SignerWithAddress;
   const playerBusdInitialBalance: BigNumber = BigNumber.from(300000);
 
@@ -28,30 +29,30 @@ describe('Marketplace', async () => {
   const starterPackNumber = 6;
 
   beforeEach(async () => {
-    owner = (await ethers.getSigners())[0];
-    player = (await ethers.getSigners())[1];
+    moderator = (await ethers.getSigners())[0];
+    owner = (await ethers.getSigners())[1];
+    player = (await ethers.getSigners())[2];
 
     const Busd = await ethers.getContractFactory('BusdMock');
     busdContract = await Busd.connect(owner).deploy();
     await busdContract.connect(owner).deployed();
 
     const HeroNft = await ethers.getContractFactory('HeroNft');
-    heroNftContract = await HeroNft.connect(owner).deploy(owner.address);
+    heroNftContract = await HeroNft.deploy(owner.address);
     await heroNftContract.connect(owner).deployed();
 
     const Marketplace = await ethers.getContractFactory('PixelKingsMarketplace');
-    marketplaceContract = await Marketplace.connect(owner).deploy(busdContract.address, heroNftContract.address);
+    marketplaceContract = await Marketplace.deploy(busdContract.address, heroNftContract.address, owner.address);
     await marketplaceContract.connect(owner).deployed();
 
     await heroNftContract.setMarketplace(marketplaceContract.address);
 
-    await busdContract.connect(player).mint(player.address, playerBusdInitialBalance);
+    await busdContract.connect(player).mint(playerBusdInitialBalance);
 
     addHeroesToMarketplace();
   });
 
   it('Should deploy correctly', async () => {
-    expect(await marketplaceContract.owner()).to.equal(owner.address);
     expect(await marketplaceContract.tokenAddress()).to.equal(busdContract.address);
     expect(await marketplaceContract.heroNft()).to.equal(heroNftContract.address);
   });
@@ -72,7 +73,7 @@ describe('Marketplace', async () => {
 
     busdContract.connect(player).approve(marketplaceContract.address, starterPackPrice);
 
-    await marketplaceContract.connect(player).buyStarterPack();
+    await marketplaceContract.connect(player).buyBox(starterPackNumber);
 
     expect(await marketplaceContract.connect(player).playerBoxCount(player.address)).to.equal(1);
 
@@ -100,7 +101,7 @@ describe('Marketplace', async () => {
 
     busdContract.connect(player).approve(marketplaceContract.address, starterPackPrice);
 
-    await marketplaceContract.connect(player).buyStarterPack();
+    await marketplaceContract.connect(player).buyBox(starterPackNumber);
 
     expect(await marketplaceContract.connect(player).openStarterPack(1, 2, 73)).to.emit(marketplaceContract, "NewHeroNft")
       .withArgs(expectedHeroId1, player.address)
@@ -130,133 +131,39 @@ describe('Marketplace', async () => {
   });
 
   const addHeroesToMarketplace = async () => {
-    await marketplaceContract.addNewHero(0, "Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Frost Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Frost Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Double Arrows");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Double Arrows", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Triple Arrows");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Triple Arrows", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Sniper Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Sniper Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Gemini Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Gemini Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Bomerang Man");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Bomerang Man", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Bomber Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Bomber Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Random Bomber Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Random Bomber Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Launcher Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Launcher Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "The Mad Archer");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("The Mad Archer", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(0, "Frozen Bomber");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Frozen Bomber", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(1, "Black Wolf");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Black Wolf", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(1, "Red Wolf");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Red Wolf", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(2, "Soldier");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Soldier", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(2, "Golden Soldier");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Golden Soldier", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(2, "Steel Crog");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Steel Crog", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(2, "Golden Crog");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Golden Crog", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(3, "Bomberman");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Bomberman", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(3, "TNT Tactician");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("TNT Tactician", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(3, "Magnus Wizard");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Magnus Wizard", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Fire Golem");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Fire Golem", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Lantern Wizard");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Lantern Wizard", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Magnetic Wizard");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Magnetic Wizard", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Windcaller Wizard");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Windcaller Wizard", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Magic Shield");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Magic Shield", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Toxic Wizard");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Toxic Wizard", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(4, "Spider Shield");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Spider Shield", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(5, "Sea Dragon");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Sea Dragon", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(5, "Sea Dragon Ambusher");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Sea Dragon Ambusher", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(6, "Novice Miner");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Novice Miner", index, "uri" + index);
-    }
-    await marketplaceContract.addNewHero(6, "Master Miner");
-    for (let index = 0; index < 5; index++) {
-      await marketplaceContract.updateHeroUri("Master Miner", index, "uri" + index);
+    for (let rarity = 0; rarity < 5; rarity++) {
+      await marketplaceContract.addNewHero(0, "Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Frost Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Double Arrows", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Triple Arrows", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Sniper Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Gemini Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Bomerang Man", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Bomber Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Random Bomber Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Launcher Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "The Mad Archer", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(0, "Frozen Bomber", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(1, "Black Wolf", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(1, "Red Wolf", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(2, "Soldier", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(2, "Golden Soldier", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(2, "Steel Crog", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(2, "Golden Crog", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(3, "Bomberman", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(3, "TNT Tactician", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(3, "Magnus Wizard", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Fire Golem", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Lantern Wizard", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Magnetic Wizard", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Windcaller Wizard", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Magic Shield", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Toxic Wizard", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(4, "Spider Shield", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(5, "Sea Dragon", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(5, "Sea Dragon Ambusher", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(6, "Novice Miner", rarity, "uri" + rarity);
+      await marketplaceContract.addNewHero(6, "Master Miner", rarity, "uri" + rarity);
     }
   }
 });
