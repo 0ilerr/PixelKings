@@ -226,7 +226,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
     function addNewHero(
         Class _class,
         string memory _name,
-        Rarity rarity,
+        Rarity _rarity,
         string memory _uri
     ) external onlyRole(MODERATOR_ROLE) {
         string[] memory heros = classToHeros[_class];
@@ -238,12 +238,12 @@ contract PixelKingsMarketplace is PixelKingsUtils {
                 keccak256(abi.encodePacked(heros[i])) ==
                 keccak256(abi.encodePacked(_name))
             ) {
-                heroUri[_name][rarity] = _uri;
+                heroUri[_name][_rarity] = _uri;
                 emit UpdateHero(_name, _uri);
             } else {
                 heros[herosLength] = _name;
                 classToHeros[_class] = heros;
-                heroUri[_name][rarity] = _uri;
+                heroUri[_name][_rarity] = _uri;
                 emit NewHero(_name, _class);
             }
         }
