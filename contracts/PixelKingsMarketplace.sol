@@ -68,7 +68,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
 
         playerBoxCount[sender]++;
 
-        //ERC20(tokenAddress).transferFrom(sender, , boxPrice[_box]);
+        ERC20(tokenAddress).transferFrom(sender, address(this), boxPrice[_box]);
 
         playerBoxes[sender][_box]++;
         availableBoxes[_box]--;
@@ -79,7 +79,10 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         Class _class,
         uint8 _module
     ) external {
-        require(_box != Box.StarterPack, "Starter pack must be open through openStarterPack function");
+        require(
+            _box != Box.StarterPack,
+            "Starter pack must be open through openStarterPack function"
+        );
 
         address sender = _msgSender();
 
