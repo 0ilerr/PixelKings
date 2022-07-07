@@ -79,6 +79,8 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         Class _class,
         uint8 _module
     ) external {
+        require(_box != Box.StarterPack, "Starter pack must be open through openStarterPack function");
+
         address sender = _msgSender();
 
         require(playerBoxes[sender][_box] > 0, "Player do not have a box");
@@ -91,31 +93,13 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         emit NewHeroNft(id, sender);
     }
 
-    function buyStarterPack() external {
-        address sender = _msgSender();
-
-        require(!privateSale || whitelist[sender], "Open sale has not started");
-        require(playerBoxCount[sender] < maxBuy, "Reached max buy");
-
-        playerBoxCount[sender]++;
-
-        /*
-        ERC20(tokenAddress).transferFrom(
-            sender,
-            owner(),
-            boxPrice[Box.StarterPack]
-        );
-        */
-        playerBoxes[sender][Box.StarterPack]++;
-        availableBoxes[Box.StarterPack]--;
-    }
-
     function openStarterPack(
         Class _class1,
         Class _class2,
         uint8 _module
     ) external {
         address sender = _msgSender();
+        //TODO: Criar função privada para essas 3 operações e chamar a função 3 vezes
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
         uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
         emit NewHeroNft(id, sender);
