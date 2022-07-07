@@ -6,6 +6,7 @@ import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-etherscan';
 import 'solidity-coverage';
+import "hardhat-gas-reporter"
 
 dotenv.config();
 
@@ -15,9 +16,9 @@ const BSCSCAN_API_KEY: any = process.env.BSCSCAN_API_KEY;
 const POLYGON_API_KEY: any = process.env.POLYGON_API_KEY;
 
 
-
 const config: HardhatUserConfig = {
   solidity: '0.8.4',
+  /*
   networks: {
     local: {
       url: "HTTP://127.0.0.1:7545",
@@ -42,6 +43,11 @@ const config: HardhatUserConfig = {
       polygonMumbai: POLYGON_API_KEY,
       polygon: POLYGON_API_KEY
     }
+  }
+  */
+  gasReporter: {
+    currency: 'CHF',
+    gasPrice: 21
   }
 };
 
