@@ -234,21 +234,23 @@ contract PixelKingsMarketplace is PixelKingsUtils {
     ) external onlyRole(MODERATOR_ROLE) {
         string[] memory heros = classToHeros[_class];
 
-        uint256 herosLength = heros.length;
-
-        for (uint256 i; i < herosLength; i++) {
+        bool heroAlreadyAdded;
+        for (uint256 i; i < heros.length; i++) {
             if (
                 keccak256(abi.encodePacked(heros[i])) ==
                 keccak256(abi.encodePacked(_name))
             ) {
-                heroUri[_name][_rarity] = _uri;
-                emit UpdateHero(_name, _uri);
-            } else {
-                heros[herosLength] = _name;
-                classToHeros[_class] = heros;
-                heroUri[_name][_rarity] = _uri;
-                emit NewHero(_name, _class);
+                heroAlreadyAdded = true;
             }
+        }
+
+        if (heroAlreadyAdded) {
+            heroUri[_name][_rarity] = _uri;
+            emit UpdateHero(_name, _uri);
+        } else {
+            classToHeros[_class].push(_name);
+            heroUri[_name][_rarity] = _uri;
+            emit NewHero(_name, _class);
         }
     }
 
