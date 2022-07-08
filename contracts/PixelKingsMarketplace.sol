@@ -42,13 +42,13 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
         _grantRole(MODERATOR_ROLE, _msgSender());
 
-        boxPrice[Box.BronzenBox] = 30;
-        boxPrice[Box.SilverBox] = 50;
-        boxPrice[Box.GoldenBox] = 100;
-        boxPrice[Box.MinerBox] = 100;
-        boxPrice[Box.GreenBox] = 20;
-        boxPrice[Box.BlueBox] = 20;
-        boxPrice[Box.StarterPack] = 50;
+        boxPrice[Box.BronzenBox] = 30 ether;
+        boxPrice[Box.SilverBox] = 50 ether;
+        boxPrice[Box.GoldenBox] = 100 ether;
+        boxPrice[Box.MinerBox] = 100 ether;
+        boxPrice[Box.GreenBox] = 20 ether;
+        boxPrice[Box.BlueBox] = 20 ether;
+        boxPrice[Box.StarterPack] = 50 ether;
 
         availableBoxes[Box.BronzenBox] = 5000;
         availableBoxes[Box.SilverBox] = 3500;
@@ -104,15 +104,15 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         address sender = _msgSender();
         //TODO: Criar função privada para essas 3 operações e chamar a função 3 vezes
         Hero memory hero1 = _openBox(Box.BlueBox, _class1, _module);
-        uint256 id = HeroNft(heroNft).mintHero(sender, hero1);
+        uint256 id = HeroNft(heroNft).mintHero(sender, hero1, heroUri[hero1.name][hero1.rarity]);
         emit NewHeroNft(id, sender);
 
         Hero memory hero2 = _openBox(Box.BlueBox, _class2, _module);
-        uint256 id2 = HeroNft(heroNft).mintHero(sender, hero2);
+        uint256 id2 = HeroNft(heroNft).mintHero(sender, hero2, heroUri[hero2.name][hero2.rarity]);
         emit NewHeroNft(id2, sender);
 
         Hero memory hero3 = _openBox(Box.GreenBox, Class.Miner, _module);
-        uint256 id3 = HeroNft(heroNft).mintHero(sender, hero3);
+        uint256 id3 = HeroNft(heroNft).mintHero(sender, hero3, heroUri[hero3.name][hero3.rarity]);
         emit NewHeroNft(id3, sender);
     }
 
