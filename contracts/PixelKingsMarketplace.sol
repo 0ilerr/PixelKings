@@ -18,7 +18,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
     mapping(address => bool) public whitelist;
     mapping(Box => uint256) public availableBoxes;
     mapping(address => uint8) public playerBoxCount;
-    mapping(address => mapping(Box => uint256)) private playerBoxes;
+    mapping(address => mapping(Box => uint256)) public playerBoxes;
 
     bool private privateSale = true;
     uint8 private maxBuy = 6;
