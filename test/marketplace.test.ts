@@ -11,21 +11,21 @@ describe('Marketplace', async () => {
   let owner: SignerWithAddress;
   let moderator: SignerWithAddress;
   let player: SignerWithAddress;
-  const playerBusdInitialBalance: BigNumber = BigNumber.from(300000);
+  const playerBusdInitialBalance: BigNumber = BigNumber.from(30000000000000000000000);
 
-  const brozenBoxPrice: BigNumber = BigNumber.from(30);
+  const brozenBoxPrice: BigNumber = BigNumber.from(30000000000000000000);
   const brozenBoxNumber = 0;
-  const silverBoxPrice: BigNumber = BigNumber.from(50);
+  const silverBoxPrice: BigNumber = BigNumber.from(50000000000000000000);
   const silverBoxNumber = 1;
-  const goldenBoxPrice: BigNumber = BigNumber.from(100);
+  const goldenBoxPrice: BigNumber = BigNumber.from(100000000000000000000);
   const goldenBoxNumber = 2;
-  const minerBoxPrice: BigNumber = BigNumber.from(100);
+  const minerBoxPrice: BigNumber = BigNumber.from(100000000000000000000);
   const minerBoxNumber = 3;
-  const greenBoxPrice: BigNumber = BigNumber.from(20);
+  const greenBoxPrice: BigNumber = BigNumber.from(20000000000000000000);
   const greenBoxNumber = 4;
-  const blueBoxPrice: BigNumber = BigNumber.from(20);
+  const blueBoxPrice: BigNumber = BigNumber.from(20000000000000000000);
   const blueBoxNumber = 5;
-  const starterPackPrice: BigNumber = BigNumber.from(50);
+  const starterPackPrice: BigNumber = BigNumber.from(50000000000000000000);
   const starterPackNumber = 6;
 
   beforeEach(async () => {
@@ -79,7 +79,7 @@ describe('Marketplace', async () => {
 
   });
 
-  it.only('Should open bronzen box', async () => {
+  it('Should open bronzen box', async () => {
     const expectedHeroId = 0;
 
     await marketplaceContract.addToWhitelist(player.address);
