@@ -91,7 +91,7 @@ contract PixelKingsMarketplace is PixelKingsUtils {
         playerBoxes[sender][_box]--;
 
         Hero memory hero = _openBox(_box, _class, _module);
-        uint256 id = HeroNft(heroNft).mintHero(sender, hero);
+        uint256 id = HeroNft(heroNft).mintHero(sender, hero, heroUri[hero.name][hero.rarity]);
 
         emit NewHeroNft(id, sender);
     }

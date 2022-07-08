@@ -18,14 +18,14 @@ contract HeroNft is ERC721URIStorage, PixelKingsUtils {
 
     Hero[] public heros;
 
-    function mintHero(address recipient, Hero memory hero)
+    function mintHero(address recipient, Hero memory hero, string memory uri)
         public
         onlyRole(MARKETPLACE_ROLE)
         returns (uint256)
     {
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId, heroUri[hero.name][hero.rarity]);
+        _setTokenURI(newItemId, uri);
         heros.push(hero);
 
         _tokenIds.increment();
